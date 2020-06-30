@@ -9,6 +9,12 @@ There is a demo app in [tests/dummy](https://github.com/BryanHunt/ember-split-vi
 ember install ember-split-view
 ```
 
+## Compatibility
+
+* Ember.js v3.12 or above
+* Ember CLI v2.13 or above
+* Node.js v10 or above
+
 ## Configuration
 
 You need to add the following to your `config/environment.js`:
