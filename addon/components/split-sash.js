@@ -24,10 +24,12 @@ export default Component.extend({
     // run next to avoid changing the component during a render iteration
     const parent = this.get('parent');
     next(this, () => {
-      if (parent) {
-        this.set('parent.sash', this);
+      if (!this.isDestroying) {
+        if (parent) {
+          this.set('parent.sash', this);
+        }
+        this._setStyle();
       }
-      this._setStyle();
     });
   },
 

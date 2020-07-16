@@ -66,8 +66,8 @@ export default Component.extend({
   classNameBindings: ['isDragging:dragging', 'isVertical:vertical:horizontal'],
 
   init() {
-    this._super();
-    this.set('splits', A());
+    this._super(...arguments);
+    this.splits = A();
   },
 
   didInsertElement(...args) {
@@ -78,37 +78,39 @@ export default Component.extend({
 
     // run next to avoid changing the component during a render iteration
     next(this, () => {
-      this.set('isRoot', isRoot);
-      const resizeService = this.get('resizeService');
+      if (!this.isDestroying) {
+        this.set('isRoot', isRoot);
+        const resizeService = this.get('resizeService');
 
-      if (!isRoot) {
-        parentView.set('childSplitView', this);
-        if (resizeService) {
-          resizeService.off('didResize', this, this.didResize);
+        if (!isRoot) {
+          parentView.set('childSplitView', this);
+          if (resizeService) {
+            resizeService.off('didResize', this, this.didResize);
+          }
+        } else {
+          // only need width and height on root split-view
+          // split-child passes it down the tree for nested ones
+          if (resizeService) {
+            resizeService.on('didResize', this, this.didResize);
+          }
         }
-      } else {
-        // only need width and height on root split-view
-        // split-child passes it down the tree for nested ones
-        if (resizeService) {
-          resizeService.on('didResize', this, this.didResize);
-        }
+        next(this, () => {
+          this._setStyle();
+        });
+        scheduleOnce('afterRender', this, () => {
+          // must do this in afterRender so that the parent has calculated its width and height
+          const element = this.$();
+          this.set('width', element.width());
+          this.set('height', element.height());
+        });
       }
-      next(this, () => {
-        this._setStyle();
-      });
-      scheduleOnce('afterRender', this, () => {
-        // must do this in afterRender so that the parent has calculated its width and height
-        const element = this.$();
-        this.set('width', element.width());
-        this.set('height', element.height());
-      });
     });
   },
 
   willDestroyElement() {
     this._super();
     const resizeService = this.get('resizeService');
-    if (resizeService) {
+    if (resizeService && resizeService.has('didResize')) {
       resizeService.off('didResize', this, this.didResize);
     }
   },

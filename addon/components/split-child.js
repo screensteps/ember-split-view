@@ -28,10 +28,12 @@ export default Component.extend({
 
     // run next to avoid changing the component during a render iteration
     next(this, () => {
-      if (parent && parent.addSplit) {
-        parent.addSplit(this);
+      if (!this.isDestroying) {
+        if (parent && parent.addSplit) {
+          parent.addSplit(this);
+        }
+        this._setStyle();
       }
-      this._setStyle();
     });
   },
 
